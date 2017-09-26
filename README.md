@@ -1,2 +1,2 @@
-# docker-gerrit-ubuntu
+# Gerrit Ubuntu Docker Container
 Ubuntu based gerrit container
