@@ -9,7 +9,7 @@ set_gerrit_config() {
 }
 
 set_secure_config() {
-    su-exec ${GERRIT_USER} git config -f "${GERRIT_HOME}/etc/secure.config" "$@"
+    sudo -u ${GERRIT_USER} git config -f "${GERRIT_HOME}/etc/secure.config" "$@"
 }
 
 
