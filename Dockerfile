@@ -4,12 +4,10 @@ LABEL "author"="Hasan Comak"
 ENV GERRIT_VERSION="2.13.9"
 ENV GERRIT_RELEASE=1
 
-
 ENV GERRIT_HOME /var/gerrit
 ENV GERRIT_SITE ${GERRIT_HOME}/review_site
 ENV GERRIT_USER gerrit
 ENV GERRIT_WAR ${GERRIT_HOME}/bin/gerrit.war
-
 
 # Add Gerrit packages to repository
 RUN echo "deb mirror://mirrorlist.gerritforge.com/deb gerrit contrib" > /etc/apt/sources.list.d/GerritForge.list
@@ -32,16 +30,17 @@ RUN apt-get -y install gerrit=$GERRIT_VERSION-$GERRIT_RELEASE && rm -f ${GERRIT_
 RUN adduser "${GERRIT_USER}" sudo
 
 
+# Copy entrypoint scripts to a known location COPY
+COPY gerrit-entrypoint.sh /
+COPY gerrit-start.sh /
+RUN  chmod +x /gerrit*.sh
+
+
 USER ${GERRIT_USER}
 
 # Create the directory for gerrit beforehand and give the ownership to the new user.
 RUN sudo -u  ${GERRIT_USER} mkdir -p $GERRIT_SITE
 
-
-# Copy entrypoint scripts to a known location COPY
-COPY gerrit-entrypoint.sh /
-COPY gerrit-start.sh /
-RUN chmod +x /gerrit*.sh
 
 
 # Install all gerrit plugins
@@ -53,7 +52,6 @@ EXPOSE 29418 8080
 VOLUME ["${GERRIT_HOME}/git", "${GERRIT_HOME}/index", "${GERRIT_HOME}/cache", "${GERRIT_HOME}/db", "${GERRIT_HOME}/etc"]
 
 ENTRYPOINT ["/gerrit-entrypoint.sh"]
-
 
 # Start Gerrit
 CMD ["/gerrit-start.sh"]
