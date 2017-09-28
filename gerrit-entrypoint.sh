@@ -60,7 +60,8 @@ if [ "$1" = "/gerrit-start.sh" ]; then
     [ -z "${LISTEN_ADDR}" ] || set_gerrit_config sshd.listenAddress "${LISTEN_ADDR}"
 
     #Section database
-    if [ "${DATABASE_TYPE}" = 'postgresql' ]; then
+    if [ "${DATABASE_TYPE}" = 'POSTGRESQL' ]; then
+	echo "Configuring postgresql "
 	set_gerrit_config database.type "${DATABASE_TYPE}"
 	[ -z "${DB_PORT_5432_TCP_ADDR}" ]    || set_gerrit_config database.hostname "${DB_PORT_5432_TCP_ADDR}"
 	[ -z "${DB_PORT_5432_TCP_PORT}" ]    || set_gerrit_config database.port "${DB_PORT_5432_TCP_PORT}"
@@ -70,7 +71,8 @@ if [ "$1" = "/gerrit-start.sh" ]; then
     fi
 
     #Section database
-    if [ "${DATABASE_TYPE}" = 'mysql' ]; then
+    if [ "${DATABASE_TYPE}" = 'MYSQL' ]; then
+	echo "Configuring mysql "
 	set_gerrit_config database.type "${DATABASE_TYPE}"
 	[ -z "${DB_PORT_3306_TCP_ADDR}" ] || set_gerrit_config database.hostname "${DB_PORT_3306_TCP_ADDR}"
 	[ -z "${DB_PORT_3306_TCP_PORT}" ] || set_gerrit_config database.port "${DB_PORT_3306_TCP_PORT}"
