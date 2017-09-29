@@ -16,13 +16,12 @@ RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 1871F775
 # Allow remote connectivity and sudo
 RUN apt-get update
 RUN apt-key update
-RUN apt-get -y install openssh-client sudo
+RUN apt-get -y install openssh-client sudo curl
 
 # Install OpenJDK and Gerrit in two subsequent transactions
 # (pre-trans Gerrit script needs to have access to the Java command)
 RUN apt-get -y install openjdk-8-jdk
 RUN apt-get -y install gerrit=$GERRIT_VERSION-$GERRIT_RELEASE && rm -f ${GERRIT_HOME}/logs/*
-
 
 # Add our user and group first to make sure their IDs get assigned consistently,
 # regardless of whatever dependencies get added
@@ -41,11 +40,13 @@ USER ${GERRIT_USER}
 # Create the directory for gerrit beforehand and give the ownership to the new user.
 RUN sudo -u  ${GERRIT_USER} mkdir -p $GERRIT_SITE
 
-
-
 # Install all gerrit plugins
-RUN java -jar ${GERRIT_HOME}/bin/gerrit.war init --batch --install-all-plugins -d ${GERRIT_HOME}
+#RUN sudo -u ${GERRIT_USER} java -jar ${GERRIT_HOME}/bin/gerrit.war init --batch --install-all-plugins -d ${GERRIT_HOME}
+# Remove all repos for later db selection
+# RUN rm -rf $GERRIT_HOME/git/*
 
+# Download mysql driver
+RUN curl -fSsL http://central.maven.org/maven2/mysql/mysql-connector-java/5.1.6/mysql-connector-java-5.1.6.jar -o ${GERRIT_HOME}/lib/mysql-connector-java.jar
 
 # Allow incoming traffic
 EXPOSE 29418 8080
