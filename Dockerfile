@@ -18,15 +18,16 @@ RUN apt-get update
 RUN apt-key update
 RUN apt-get -y install openssh-client sudo curl
 
+
+# Add our user and group first to make sure their IDs get assigned consistently,
+# regardless of whatever dependencies get added
+RUN useradd -d "${GERRIT_HOME}"  "${GERRIT_USER}" && echo "${GERRIT_USER}:password" | chpasswd && adduser "${GERRIT_USER}" sudo
+
+
 # Install OpenJDK and Gerrit in two subsequent transactions
 # (pre-trans Gerrit script needs to have access to the Java command)
 RUN apt-get -y install openjdk-8-jdk
 RUN apt-get -y install gerrit=$GERRIT_VERSION-$GERRIT_RELEASE && rm -f ${GERRIT_HOME}/logs/*
-
-# Add our user and group first to make sure their IDs get assigned consistently,
-# regardless of whatever dependencies get added
-# RUN useradd -d "${GERRIT_HOME}" -s /sbin/nologin "${GERRIT_USER}"
-RUN adduser "${GERRIT_USER}" sudo
 
 
 # Copy entrypoint scripts to a known location COPY
@@ -38,7 +39,7 @@ RUN  chmod +x /gerrit*.sh
 USER ${GERRIT_USER}
 
 # Create the directory for gerrit beforehand and give the ownership to the new user.
-RUN sudo -u  ${GERRIT_USER} mkdir -p $GERRIT_SITE
+RUN sudo -u  ${GERRIT_USER} mkdir -p $GERRIT_HOME
 
 # Install all gerrit plugins
 #RUN sudo -u ${GERRIT_USER} java -jar ${GERRIT_HOME}/bin/gerrit.war init --batch --install-all-plugins -d ${GERRIT_HOME}

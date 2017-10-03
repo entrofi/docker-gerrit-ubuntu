@@ -25,19 +25,19 @@ if [ "$1" = "/gerrit-start.sh" ]; then
     # This obviously ensures the permissions are set correctly for when gerrit starts.
     echo "Changing ownership for gerrit directories"
     ls -la "${GERRIT_HOME}"
-    chown -R ${GERRIT_USER} "${GERRIT_HOME}"
+    echo "password" | sudo -S chown -R ${GERRIT_USER} "${GERRIT_HOME}"
 
     
     # Initialize Gerrit if ${GERRIT_HOME}/git is empty.
     if [ -z "$(ls -A "$GERRIT_HOME/git")" ]; then
 	echo "First time initialize gerrit..."
 	sudo -u  ${GERRIT_USER} java ${JAVA_OPTIONS} ${JAVA_MEM_OPTIONS} -jar "${GERRIT_WAR}" init  --batch --install-all-plugins --no-auto-start -d "${GERRIT_HOME}" ${GERRIT_INIT_ARGS}
-	
+	sudo -u  ${GERRIT_USER} java ${JAVA_OPTIONS} ${JAVA_MEM_OPTIONS} -jar "${GERRIT_WAR}" reindex -d "${GERRIT_HOME}"
 	#All git repositories must be removed when database is set as postgres or mysql
 	#in order to be recreated at the secondary init below.
 	#Or an execption will be thrown on secondary init.
-	#[ ${#DATABASE_TYPE} -gt 0 ] && rm -rf "${GERRIT_HOME}/git/*"
-	ls -la "${GERRIT_HOME}/git/"
+	[ ${#DATABASE_TYPE} -gt 0 ] && rm -rf "${GERRIT_HOME}/git/*"
+	ls -la "${GERRIT_HOME}/git/*"
     fi
 
     # Install external plugins
@@ -221,6 +221,8 @@ if [ "$1" = "/gerrit-start.sh" ]; then
     set_gerrit_config gitweb.type "$GITWEB_TYPE"
     echo "Re-initializing gerrit to update schema version"
     sudo -u  ${GERRIT_USER} java ${JAVA_OPTIONS} ${JAVA_MEM_OPTIONS} -jar "${GERRIT_WAR}" init  --batch -d "${GERRIT_HOME}" ${GERRIT_INIT_ARGS}
+    sudo -u  ${GERRIT_USER} java ${JAVA_OPTIONS} ${JAVA_MEM_OPTIONS} -jar "${GERRIT_WAR}" reindex -d "${GERRIT_HOME}"
+    echo "Final gerrit configuration"
     cat "${GERRIT_HOME}/etc/gerrit.config"
 fi
 exec "$@"
