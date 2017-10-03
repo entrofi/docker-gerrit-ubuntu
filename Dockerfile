@@ -16,7 +16,7 @@ RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 1871F775
 # Allow remote connectivity and sudo
 RUN apt-get update
 RUN apt-key update
-RUN apt-get -y install openssh-client sudo curl
+RUN apt-get -y install openssh-client sudo curl libcgi-pm-perl
 
 
 # Add our user and group first to make sure their IDs get assigned consistently,
